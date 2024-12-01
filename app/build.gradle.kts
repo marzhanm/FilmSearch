@@ -15,7 +15,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        buildConfigField("String", "YOUTUBE_API_KEY", "8bb76733-3fab-43fe-ba5b-22a8895f1bbf")
+        buildConfigField("String", "KINOPOISK_API_KEY", "8bb76733-3fab-43fe-ba5b-22a8895f1bbf")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -40,7 +40,6 @@ android {
     }
     buildFeatures {
         compose = true
-        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"

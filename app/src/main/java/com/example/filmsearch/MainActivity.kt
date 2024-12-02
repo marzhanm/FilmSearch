@@ -51,14 +51,14 @@ class MainActivity : ComponentActivity() {
 data class FilmItem(val title: String, val rating: String, val imageResId: Int)
 
 val Watched  = listOf(
-    FilmItem("Ворон", "7.8", R.drawable._1),
-    FilmItem("Битл Джус", "7.5", R.drawable._2),
-    FilmItem("Тихое место", "8.0", R.drawable._3),
-    FilmItem("Претеденты", "7.3", R.drawable._4),
-    FilmItem("Рай", "7.6", R.drawable._5),
-    FilmItem("Воздух", "8.2", R.drawable._7),
-    FilmItem("Субстанция", "7.9", R.drawable._8),
-    FilmItem("Собиратель душ", "8.1", R.drawable._1)
+    FilmItem("Ворон", "7.8", R.drawable.voron),
+    FilmItem("Битл Джус", "7.5", R.drawable.beetlejuice),
+    FilmItem("Тихое место", "8.0", R.drawable.tihoemesto),
+    FilmItem("Претеденты", "7.3", R.drawable.pretendents),
+    FilmItem("Рай", "7.6", R.drawable.rai),
+    FilmItem("Воздух", "8.2", R.drawable.air),
+    FilmItem("Субстанция", "7.9", R.drawable.substantion),
+    FilmItem("Собиратель душ", "8.1", R.drawable.vsemirnyypotop)
 )
 
 @Preview(showBackground = true)
@@ -108,13 +108,13 @@ fun FilmGenre(title: String, items: List<FilmItem>) {
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
-            Image(
-                painter = painterResource(R.drawable.icons),
-                contentDescription = "Удалить историю",
-                modifier = Modifier
-                    .size(24.dp)
-                    .clickable { println("Show all clicked for $title") }
-            )
+//            Image(
+//                painter = painterResource(R.drawable.icons),
+//                contentDescription = "Удалить историю",
+//                modifier = Modifier
+//                    .size(24.dp)
+//                    .clickable { println("Show all clicked for $title") }
+//            )
             Text(
                 "Удалить историю",
                 color = Color.Blue,
@@ -196,13 +196,13 @@ fun CollectionPage() {
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ImageWithButton(title = "Любимые", imageRes = R.drawable.outline)
-            ImageWithButton(title = "Избранные", imageRes = R.drawable.outline__1_)
+            ImageWithButton(title = "Любимые", imageRes = R.drawable.favourite)
+            ImageWithButton(title = "Избранные", imageRes = R.drawable.izbran)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        ImageWithButton(title = "Русские", imageRes = R.drawable.outline__2_)
+        ImageWithButton(title = "Русские", imageRes = R.drawable.profile)
     }
 }
 

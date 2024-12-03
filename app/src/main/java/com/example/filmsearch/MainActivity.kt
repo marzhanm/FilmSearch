@@ -1,5 +1,6 @@
 package com.example.filmsearch
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,6 +39,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+
+
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,16 +73,61 @@ val Watched  = listOf(
 @Preview(showBackground = true)
 @Composable
 fun ProfilePage() {
+    // Храним список фильмов в состоянии
+    val watchedFilms = remember { mutableStateListOf(*Watched.toTypedArray()) }
+
     Column(modifier = Modifier.padding(16.dp)) {
         Spacer(modifier = Modifier.height(45.dp)) // Отступ сверху
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            item { FilmGenre(title = "Просмотрено", items = Watched) }
+
+        // Если список не пустой, показываем его, иначе — текст "Список пуст"
+        if (watchedFilms.isNotEmpty()) {
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                item {
+                    FilmGenre(
+                        title = "Просмотрено",
+                        items = watchedFilms,
+                        onDeleteHistory = { watchedFilms.clear() }
+                    )
+                }
+            }
+        } else {
+            Text(
+                text = "Список пуст",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center
+            )
         }
+
+        Spacer(modifier = Modifier.height(16.dp)) // Отступ между секциями
+
+        // Отображение "Коллекции"
+        CollectionPage()
     }
 }
 
+//@Composable
+//fun ProfilePage() {
+//    Column(modifier = Modifier.padding(16.dp)) {
+//        Spacer(modifier = Modifier.height(45.dp)) // Отступ сверху
+//        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+//            item { FilmGenre(title = "Просмотрено", items = Watched) }
+//        }
+//        Spacer(modifier = Modifier.height(16.dp)) // Отступ между секциями
+//
+//        // Отображение "Коллекции"
+//        CollectionPage()
+//    }
+//}
+
 @Composable
-fun FilmGenre(title: String, items: List<FilmItem>) {
+fun FilmGenre(
+    title: String,
+    items: List<FilmItem>,
+    onDeleteHistory: () -> Unit
+) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -108,23 +162,70 @@ fun FilmGenre(title: String, items: List<FilmItem>) {
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
-//            Image(
-//                painter = painterResource(R.drawable.icons),
-//                contentDescription = "Удалить историю",
-//                modifier = Modifier
-//                    .size(24.dp)
-//                    .clickable { println("Show all clicked for $title") }
-//            )
+            // Кнопка "Удалить историю"
             Text(
                 "Удалить историю",
                 color = Color.Blue,
                 modifier = Modifier
-                    .clickable { println("Show all clicked for $title") }
+                    .clickable { onDeleteHistory() } // Вызываем функцию удаления
                     .padding(top = 4.dp)
             )
         }
     }
 }
+
+//fun FilmGenre(title: String, items: List<FilmItem>) {
+//    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+//        Spacer(modifier = Modifier.height(16.dp))
+//
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.SpaceBetween
+//        ) {
+//            Text(title, fontSize = 20.sp, modifier = Modifier.padding(bottom = 4.dp))
+//            Text(
+//                "8  >",
+//                color = Color.Blue,
+//                modifier = Modifier
+//                    .clickable { println("Show all clicked for $title") }
+//                    .padding(bottom = 4.dp)
+//            )
+//        }
+//
+//        Spacer(modifier = Modifier.height(16.dp))
+//
+//        LazyRow(modifier = Modifier.padding(bottom = 8.dp)) {
+//            items(items) { film ->
+//                FilmItemView(film) {
+//                    println("Clicked on ${film.rating}")
+//                }
+//            }
+//        }
+//
+//        Column(
+//            horizontalAlignment = Alignment.CenterHorizontally,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(bottom = 8.dp)
+//        ) {
+////            Image(
+////                painter = painterResource(R.drawable.icons),
+////                contentDescription = "Удалить историю",
+////                modifier = Modifier
+////                    .size(24.dp)
+////                    .clickable { println("Show all clicked for $title") }
+////            )
+//            Text(
+//                "Удалить историю",
+//                color = Color.Blue,
+//                modifier = Modifier
+//                    .clickable { println("Show all clicked for $title") }
+//                    .padding(top = 4.dp)
+//            )
+//        }
+//    }
+//}
 
 @Composable
 fun FilmItemView(film: FilmItem, onClick: () -> Unit) {
@@ -202,7 +303,7 @@ fun CollectionPage() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        ImageWithButton(title = "Русские", imageRes = R.drawable.profile)
+        ImageWithButton(title = "Русское кино", imageRes = R.drawable.profile)
     }
 }
 
@@ -229,7 +330,7 @@ fun ImageWithButton(title: String, imageRes: Int) {
                     painter = painterResource(id = imageRes),
                     contentDescription = title,
                     modifier = Modifier
-                        .size(100.dp)
+                        .size(25.dp)
                         .align(Alignment.CenterHorizontally)
                 )
 
@@ -239,17 +340,33 @@ fun ImageWithButton(title: String, imageRes: Int) {
                     text = title,
                     fontSize = 18.sp,
                     modifier = Modifier
-                        .padding(bottom = 8.dp)
+                        .padding(bottom = 4.dp)
                         .align(Alignment.CenterHorizontally)
                 )
                 Button(
                     onClick = {},
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    shape = RoundedCornerShape(50)
+
+                        .align(Alignment.CenterHorizontally)
+                        .width(60.dp) // Увеличьте ширину кнопки, если текст слишком длинный
+                        .height(40.dp), // Увеличьте высоту для комфортного отображения
+                        shape = RoundedCornerShape(50)
+
+
+
+
+
+
+
+
                 ) {
-                    Text(text = "105", fontSize = 16.sp)
+                    Text(
+                        text = "105",
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .padding(0.5.dp)
+
+                    )
                 }
             }
         }

@@ -1,4 +1,4 @@
-package com.example.filmsearch
+package com.example.filmsearch.data
 
 import android.content.Context
 import androidx.datastore.preferences.core.stringSetPreferencesKey

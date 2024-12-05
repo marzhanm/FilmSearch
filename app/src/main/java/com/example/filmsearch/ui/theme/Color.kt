@@ -1,4 +1,4 @@
-package com.example.filmsearch.ui.theme
+package com.example.filmsearch.theme
 
 import androidx.compose.ui.graphics.Color
 

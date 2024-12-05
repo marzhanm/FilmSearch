@@ -1,13 +1,12 @@
 package com.example.filmsearch.model
 
-import android.content.ClipData.Item
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
 @Keep
 data class FilmModel(
     @SerializedName("films")
-    val films: List<Film>,
+    val film2s: List<Film2>,
 
     @SerializedName("keyword")
     val keyword: String,

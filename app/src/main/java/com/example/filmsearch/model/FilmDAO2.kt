@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 import retrofit2.http.Url
 
 @Keep
-data class FilmDAO(
+data class FilmDAO2(
     @SerializedName("nameRu")
     val nameRu: String,
 

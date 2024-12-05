@@ -1,6 +1,5 @@
-package com.example.filmsearch
+package com.example.filmsearch.ui
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,7 +10,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,7 +40,17 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import com.example.filmsearch.R
+import com.example.filmsearch.viewmodel.FilmViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import dagger.hilt.android.AndroidEntryPoint
+
+
 
 
 
@@ -73,40 +81,21 @@ val Watched  = listOf(
 @Preview(showBackground = true)
 @Composable
 fun ProfilePage() {
-    // Храним список фильмов в состоянии
-    val watchedFilms = remember { mutableStateListOf(*Watched.toTypedArray()) }
+    val navController = rememberNavController() // Создаём контроллер навигации
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Spacer(modifier = Modifier.height(45.dp)) // Отступ сверху
-
-        // Если список не пустой, показываем его, иначе — текст "Список пуст"
-        if (watchedFilms.isNotEmpty()) {
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                item {
-                    FilmGenre(
-                        title = "Просмотрено",
-                        items = watchedFilms,
-                        onDeleteHistory = { watchedFilms.clear() }
-                    )
-                }
-            }
-        } else {
-            Text(
-                text = "Список пуст",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                fontSize = 16.sp,
-                textAlign = TextAlign.Center
-            )
+    NavHost(navController = navController, startDestination = "collectionPage") {
+        composable("collectionPage") {
+            CollectionPage(onCategoryClick = { category ->
+                navController.navigate("filmList/$category") // Навигация на экран с фильмами
+            })
         }
-
-        Spacer(modifier = Modifier.height(16.dp)) // Отступ между секциями
-
-        // Отображение "Коллекции"
-        CollectionPage()
+        composable("filmList/{category}") { backStackEntry ->
+            val category = backStackEntry.arguments?.getString("category") ?: ""
+            FilmListScreen(category) // Показываем список фильмов
+        }
     }
 }
+
 
 //@Composable
 //fun ProfilePage() {
@@ -274,46 +263,142 @@ fun FilmItemView(film: FilmItem, onClick: () -> Unit) {
     }
 }
 
+//@Composable
+//fun CollectionPage() {
+//    Column(modifier = Modifier.padding(16.dp)) {
+//        Spacer(modifier = Modifier.height(45.dp))
+//
+//        Text(
+//            text = "Коллекция",
+//            fontSize = 24.sp,
+//            fontWeight = FontWeight.Bold,
+//            modifier = Modifier.padding(bottom = 8.dp)
+//        )
+//
+//        Text(
+//            text = "+ Создать свою коллекцию",
+//            fontSize = 18.sp,
+//            modifier = Modifier.padding(bottom = 16.dp)
+//        )
+//
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            horizontalArrangement = Arrangement.spacedBy(16.dp),
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            ImageWithButton(title = "Любимые", imageRes = R.drawable.favourite)
+//            ImageWithButton(title = "Избранные", imageRes = R.drawable.izbran)
+//        }
+//
+//        Spacer(modifier = Modifier.height(16.dp))
+//
+//        ImageWithButton(title = "Русское кино", imageRes = R.drawable.profile)
+//    }
+//}
 @Composable
-fun CollectionPage() {
+fun CollectionPage(viewModel: FilmViewModel = hiltViewModel(), onCategoryClick: (String) -> Unit) {
+    val filmCounts by viewModel.filmCounts.observeAsState(initial = mapOf())
+
+    LaunchedEffect(Unit) {
+        viewModel.loadFilmCounts()
+    }
+
     Column(modifier = Modifier.padding(16.dp)) {
-        Spacer(modifier = Modifier.height(45.dp))
-
-        Text(
-            text = "Коллекция",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        Text(
-            text = "+ Создать свою коллекцию",
-            fontSize = 18.sp,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ImageWithButton(title = "Любимые", imageRes = R.drawable.favourite)
-            ImageWithButton(title = "Избранные", imageRes = R.drawable.izbran)
-        }
-
+        Text(text = "Коллекция", fontSize = 24.sp)
         Spacer(modifier = Modifier.height(16.dp))
 
-        ImageWithButton(title = "Русское кино", imageRes = R.drawable.profile)
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            ImageWithButton(
+                title = "Любимые",
+                imageRes = R.drawable.favourite,
+                count = filmCounts["Любимые"] ?: 0,
+                onClick = { onCategoryClick("Любимые") }
+            )
+            ImageWithButton(
+                title = "Избранные",
+                imageRes = R.drawable.izbran,
+                count = filmCounts["Избранные"] ?: 0,
+                onClick = { onCategoryClick("Избранные") }
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        ImageWithButton(
+            title = "Русское кино",
+            imageRes = R.drawable.profile,
+            count = filmCounts["Русское кино"] ?: 0,
+            onClick = { onCategoryClick("Русское кино") }
+        )
     }
 }
 
+
+
+//@Composable
+//fun ImageWithButton(title: String, imageRes: Int) {
+//    Column(
+//        modifier = Modifier
+//            .width(160.dp)
+//            .padding(vertical = 8.dp)
+//            .fillMaxWidth()
+//            .wrapContentWidth(Alignment.CenterHorizontally)
+//    ) {
+//        Card(
+//            shape = RoundedCornerShape(16.dp),
+//            modifier = Modifier.fillMaxWidth()
+//        ) {
+//            Column(
+//                modifier = Modifier
+//                    .padding(16.dp)
+//                    .wrapContentHeight(Alignment.CenterVertically)
+//                    .fillMaxWidth()
+//            ) {
+//                Image(
+//                    painter = painterResource(id = imageRes),
+//                    contentDescription = title,
+//                    modifier = Modifier
+//                        .size(25.dp)
+//                        .align(Alignment.CenterHorizontally)
+//                )
+//
+//                Spacer(modifier = Modifier.height(8.dp))
+//
+//                Text(
+//                    text = title,
+//                    fontSize = 18.sp,
+//                    modifier = Modifier
+//                        .padding(bottom = 4.dp)
+//                        .align(Alignment.CenterHorizontally)
+//                )
+//                Button(
+//                    onClick = {},
+//                    modifier = Modifier
+//
+//                        .align(Alignment.CenterHorizontally)
+//                        .width(60.dp) // Увеличьте ширину кнопки, если текст слишком длинный
+//                        .height(40.dp), // Увеличьте высоту для комфортного отображения
+//                        shape = RoundedCornerShape(50)
+//
+//                ) {
+//                    Text(
+//                        text = "105",
+//                        fontSize = 16.sp,
+//                        modifier = Modifier
+//                            .padding(0.5.dp)
+//
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
+
 @Composable
-fun ImageWithButton(title: String, imageRes: Int) {
+fun ImageWithButton(title: String, imageRes: Int, count: Int, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .width(160.dp)
             .padding(vertical = 8.dp)
-            .fillMaxWidth()
+            .clickable(onClick = onClick) // Добавляем обработку кликов
             .wrapContentWidth(Alignment.CenterHorizontally)
     ) {
         Card(
@@ -321,56 +406,22 @@ fun ImageWithButton(title: String, imageRes: Int) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .wrapContentHeight(Alignment.CenterVertically)
-                    .fillMaxWidth()
+                modifier = Modifier.padding(16.dp)
             ) {
                 Image(
                     painter = painterResource(id = imageRes),
                     contentDescription = title,
-                    modifier = Modifier
-                        .size(25.dp)
-                        .align(Alignment.CenterHorizontally)
+                    modifier = Modifier.size(25.dp)
                 )
-
                 Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = title,
-                    fontSize = 18.sp,
-                    modifier = Modifier
-                        .padding(bottom = 4.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-                Button(
-                    onClick = {},
-                    modifier = Modifier
-
-                        .align(Alignment.CenterHorizontally)
-                        .width(60.dp) // Увеличьте ширину кнопки, если текст слишком длинный
-                        .height(40.dp), // Увеличьте высоту для комфортного отображения
-                        shape = RoundedCornerShape(50)
-
-
-
-
-
-
-
-
-                ) {
-                    Text(
-                        text = "105",
-                        fontSize = 16.sp,
-                        modifier = Modifier
-                            .padding(0.5.dp)
-
-                    )
-                }
+                Text(text = title, fontSize = 18.sp)
+                Text(text = count.toString(), fontSize = 16.sp)
             }
         }
     }
 }
+
+
+
 
 

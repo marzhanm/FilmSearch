@@ -1,4 +1,4 @@
-package com.example.filmsearch.ui.theme
+package com.example.filmsearch.theme
 
 import android.app.Activity
 import android.os.Build

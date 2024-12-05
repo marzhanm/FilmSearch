@@ -1,6 +1,7 @@
 package com.example.filmsearch.model
 
-data class Film(
+
+data class Film2(
     val countries: List<Country>,
     val description: String,
     val filmId: Int,
@@ -15,3 +16,4 @@ data class Film(
     val type: String,
     val year: String
 )
+
